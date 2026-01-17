@@ -1,0 +1,41 @@
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Credential files - NEVER COMMIT THESE!
+vertex/key.json
+*.pem
+*.key
+.env
+
+# State files for LiteLLM manager
+.litellm_ref_count
+.litellm_pid
+.litellm_refresh_pid
+.litellm_manager.log
+
+# Actual config files with credentials
+litellm_config*.yaml
+vertex/litellm_config.yaml
+basten/litellm_config*.yaml
+
+# Claude data
+.claude/
+
+# Examples folder
+examples/
+
+# OS files
+.DS_Store
+Thumbs.db

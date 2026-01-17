@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# modclaude CLI - Run Claude from anywhere with the LiteLLM proxy
+
+# Get the directory where this script is located
+MODCLAUDE_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_DIR="${1:-.}"
+
+# Resolve target directory to absolute path
+TARGET_DIR=$(cd "$TARGET_DIR" && pwd)
+
+# Activate the venv from modclaude home
+source "$MODCLAUDE_HOME/.venv/bin/activate"
+
+# Change to modclaude home for running scripts
+cd "$MODCLAUDE_HOME" || exit 1
+
+# Connect to shared LiteLLM manager
+source "$MODCLAUDE_HOME/manage_litellm.sh" connect
+
+# Function to cleanup on exit
+cleanup() {
+    local exit_code=$?
+    echo ""
+    echo "Disconnecting from LiteLLM..."
+    source "$MODCLAUDE_HOME/manage_litellm.sh" disconnect
+    exit $exit_code
+}
+
+# Set up trap to cleanup on exit
+trap cleanup SIGINT SIGTERM EXIT
+
+# Wait for LiteLLM to be ready
+sleep 2
+
+# Change to target directory for Claude
+cd "$TARGET_DIR" || exit 1
+echo "Running Claude in: $TARGET_DIR"
+echo "LiteLLM proxy: http://localhost:8000"
+echo ""
+
+# Run Claude (this runs in foreground)
+bash "$MODCLAUDE_HOME/start_claude.sh"

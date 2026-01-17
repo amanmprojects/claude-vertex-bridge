@@ -1,0 +1,276 @@
+#!/bin/bash
+
+# modoc CLI - Run opencode from anywhere with the LiteLLM proxy
+
+# Get the directory where this script is located
+MODOC_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_DIR="${1:-.}"
+
+# Resolve target directory to absolute path
+TARGET_DIR=$(cd "$TARGET_DIR" && pwd)
+
+# Activate the venv from modoc home
+source "$MODOC_HOME/.venv/bin/activate"
+
+# Change to modoc home for running scripts
+cd "$MODOC_HOME" || exit 1
+
+# Connect to shared LiteLLM manager
+source "$MODOC_HOME/manage_litellm.sh" connect
+
+# Function to cleanup on exit
+cleanup() {
+    exit_code=$?
+    echo ""
+    echo "Disconnecting from LiteLLM..."
+    source "$MODOC_HOME/manage_litellm.sh" disconnect
+    exit $exit_code
+}
+
+# Set up trap to cleanup on exit
+trap cleanup SIGINT SIGTERM EXIT
+
+# Wait for LiteLLM to be ready
+sleep 2
+
+# Change to target directory for opencode
+cd "$TARGET_DIR" || exit 1
+echo "Running opencode in: $TARGET_DIR"
+echo "LiteLLM proxy: http://localhost:8000"
+echo ""
+
+# Create temporary config for opencode to use LiteLLM proxy
+# We create a custom "litellm" provider that uses @ai-sdk/openai-compatible
+# This is needed because LiteLLM provides OpenAI-compatible endpoints, not Anthropic
+read -r -d '' OPENCODE_CONFIG_JSON << EOF
+{
+  "\$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "litellm": {
+      "name": "LiteLLM Proxy",
+      "env": [],
+      "npm": "@ai-sdk/openai-compatible",
+      "api": "http://localhost:8000/v1",
+      "options": {
+        "apiKey": "dummy"
+      },
+      "models": {
+        "minimax": {
+          "id": "minimax",
+          "name": "MiniMax M2",
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "limit": {
+            "context": 32000,
+            "input": 16000,
+            "output": 8000
+          },
+          "capabilities": {
+            "temperature": true,
+            "reasoning": false,
+            "attachment": true,
+            "toolcall": true,
+            "input": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            },
+            "output": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            }
+          }
+        },
+        "deepseek": {
+          "id": "deepseek",
+          "name": "DeepSeek V3",
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "limit": {
+            "context": 128000,
+            "input": 64000,
+            "output": 32000
+          },
+          "capabilities": {
+            "temperature": true,
+            "reasoning": false,
+            "attachment": true,
+            "toolcall": true,
+            "input": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            },
+            "output": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            }
+          }
+        },
+        "kimi": {
+          "id": "kimi",
+          "name": "Kimi K2",
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "limit": {
+            "context": 128000,
+            "input": 64000,
+            "output": 32000
+          },
+          "capabilities": {
+            "temperature": true,
+            "reasoning": false,
+            "attachment": true,
+            "toolcall": true,
+            "input": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            },
+            "output": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            }
+          }
+        },
+        "qwen": {
+          "id": "qwen",
+          "name": "Qwen Coder",
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "limit": {
+            "context": 32000,
+            "input": 16000,
+            "output": 8000
+          },
+          "capabilities": {
+            "temperature": true,
+            "reasoning": false,
+            "attachment": true,
+            "toolcall": true,
+            "input": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            },
+            "output": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            }
+          }
+        },
+        "glm-4.7": {
+          "id": "glm-4.7",
+          "name": "GLM-4.7",
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "limit": {
+            "context": 128000,
+            "input": 64000,
+            "output": 32000
+          },
+          "capabilities": {
+            "temperature": true,
+            "reasoning": false,
+            "attachment": true,
+            "toolcall": true,
+            "input": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            },
+            "output": {
+              "text": true,
+              "audio": false,
+              "image": false,
+              "video": false,
+              "pdf": false
+            }
+          }
+        }
+      }
+    }
+  }
+}
+EOF
+
+# Export config via environment variable (opencode supports OPENCODE_CONFIG_CONTENT)
+export OPENCODE_CONFIG_CONTENT="$OPENCODE_CONFIG_JSON"
+
+# Default model
+SELECTED_MODEL="glm-4.7"
+
+# Model selection menu
+echo "=== OpenCode with LiteLLM Proxy ==="
+echo "Base URL: http://localhost:8000"
+echo ""
+echo "Please select a model to use:"
+MODELS=("minimax" "deepseek" "kimi" "qwen" "glm-4.7")
+PS3="Enter model number: "
+select selected_model in "${MODELS[@]}"; do
+    if [ -n "$selected_model" ]; then
+        SELECTED_MODEL="$selected_model"
+        break
+    else
+        echo "Invalid selection. Please try again."
+    fi
+done
+
+echo ""
+echo "Selected Model: $SELECTED_MODEL"
+echo ""
+
+# Run opencode with the selected model
+opencode -m litellm/$SELECTED_MODEL
