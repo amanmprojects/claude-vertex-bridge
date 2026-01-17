@@ -2,8 +2,14 @@
 
 # modoc CLI - Run opencode from anywhere with the LiteLLM proxy
 
-# Get the directory where this script is located
-MODOC_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the directory where this script is located (resolving symlinks)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+MODOC_HOME="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 TARGET_DIR="${1:-.}"
 
 # Resolve target directory to absolute path
