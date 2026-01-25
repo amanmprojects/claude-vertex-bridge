@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game with AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Chess Game</h1>
+            <div class="game-status">
+                <div class="current-player" id="currentPlayer">White's Turn</div>
+                <div class="game-message" id="gameMessage"></div>
+            </div>
+        </header>
+
+        <div class="game-area">
+            <div class="board-container">
+                <div id="chessBoard" class="chess-board"></div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="score-board">
+                    <h3>Game Info</h3>
+                    <div class="info-item">
+                        <span class="label">Moves:</span>
+                        <span id="moveCount">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Player:</span>
+                        <span id="playerColor">White</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Difficulty:</span>
+                        <select id="difficulty">
+                            <option value="2">Easy</option>
+                            <option value="3" selected>Medium</option>
+                            <option value="4">Hard</option>
+                            <option value="5">Expert</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="game-controls">
+                    <button id="newGameBtn" class="btn btn-primary">New Game</button>
+                    <button id="undoBtn" class="btn btn-secondary">Undo Move</button>
+                </div>
+
+                <div class="captured-pieces">
+                    <h3>Captured Pieces</h3>
+                    <div class="captured-section">
+                        <h4>White</h4>
+                        <div id="capturedWhite" class="captured-list"></div>
+                    </div>
+                    <div class="captured-section">
+                        <h4>Black</h4>
+                        <div id="capturedBlack" class="captured-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="chess.js"></script>
+    <script src="ai.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

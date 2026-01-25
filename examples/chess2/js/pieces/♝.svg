@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
+  <g fill="none" fill-rule="evenodd" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="#000" stroke-linecap="butt">
+      <path d="M9 36c3.39-.97 9.11-1.45 13.5-1.45 4.39 0 10.11.48 13.5 1.45V30c0-2.59-7.03-1.74-7.03-4.63V19.5c1.28-.46 2.41-1.32 3.28-2.37 1.52-1.84 1.88-4.23 1.88-6.63 0-4.23-2.86-7.5-6.63-7.5H23c-3.77 0-6.63 3.27-6.63 7.5 0 2.4.36 4.79 1.88 6.63.87 1.05 2 1.91 3.28 2.37v5.87c0 2.89-7.03 2.04-7.03 4.63v6h1.5z"/>
+      <path d="M9 36c3.39-.97 9.11-1.45 13.5-1.45 4.39 0 10.11.48 13.5 1.45" stroke="#fff"/>
+      <path d="M15 32c2.5 2.5 12.5 2.5 15 0s-2.5-2.5-15 0z" stroke="#fff"/>
+      <path d="M22.5 5.5v2.5" stroke="#fff"/>
+    </g>
+    <path d="M22.5 15.5c-1.5 0-3 1.5-3 3"/>
+  </g>
+</svg>

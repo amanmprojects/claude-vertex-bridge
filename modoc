@@ -18,31 +18,10 @@ TARGET_DIR=$(cd "$TARGET_DIR" && pwd)
 # Activate the venv from modoc home
 source "$MODOC_HOME/.venv/bin/activate"
 
-# Change to modoc home for running scripts
-cd "$MODOC_HOME" || exit 1
-
-# Connect to shared LiteLLM manager
-source "$MODOC_HOME/manage_litellm.sh" connect
-
-# Function to cleanup on exit
-cleanup() {
-    exit_code=$?
-    echo ""
-    echo "Disconnecting from LiteLLM..."
-    source "$MODOC_HOME/manage_litellm.sh" disconnect
-    exit $exit_code
-}
-
-# Set up trap to cleanup on exit
-trap cleanup SIGINT SIGTERM EXIT
-
-# Wait for LiteLLM to be ready
-sleep 2
-
 # Change to target directory for opencode
 cd "$TARGET_DIR" || exit 1
 echo "Running opencode in: $TARGET_DIR"
-echo "LiteLLM proxy: http://localhost:8000"
+echo "LiteLLM proxy: http://localhost:8765"
 echo ""
 
 # Create temporary config for opencode to use LiteLLM proxy
@@ -56,7 +35,7 @@ read -r -d '' OPENCODE_CONFIG_JSON << EOF
       "name": "LiteLLM Proxy",
       "env": [],
       "npm": "@ai-sdk/openai-compatible",
-      "api": "http://localhost:8000/v1",
+      "api": "http://localhost:8765/v1",
       "options": {
         "apiKey": "dummy"
       },
@@ -260,7 +239,7 @@ SELECTED_MODEL="glm-4.7"
 
 # Model selection menu
 echo "=== OpenCode with LiteLLM Proxy ==="
-echo "Base URL: http://localhost:8000"
+echo "Base URL: http://localhost:8765"
 echo ""
 echo "Please select a model to use:"
 MODELS=("minimax" "deepseek" "kimi" "qwen" "glm-4.7")

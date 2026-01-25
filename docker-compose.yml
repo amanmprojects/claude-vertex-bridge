@@ -1,0 +1,16 @@
+services:
+  litellm:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: modclaude-litellm
+    ports:
+      - "8765:8765"  # Uses uncommon port
+    restart: unless-stopped  # Auto-restart on boot
+    volumes:
+      - ./vertex:/app/vertex:ro  # Read-only mount
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8765/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

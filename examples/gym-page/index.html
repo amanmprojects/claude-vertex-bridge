@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Hero 3D</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+
+        <div id="hud">
+            <div class="hud-top">
+                <div class="player-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">LEVEL</span>
+                        <span class="stat-value" id="level">1</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">XP</span>
+                        <div class="xp-bar-container">
+                            <div class="xp-bar" id="xp-bar"></div>
+                        </div>
+                        <span class="stat-value" id="xp-text">0/100</span>
+                    </div>
+                </div>
+
+                <div class="attributes">
+                    <div class="attribute">
+                        <span class="attr-icon">💪</span>
+                        <span class="attr-label">STR</span>
+                        <span class="attr-value" id="strength">10</span>
+                    </div>
+                    <div class="attribute">
+                        <span class="attr-icon">❤️</span>
+                        <span class="attr-label">END</span>
+                        <span class="attr-value" id="endurance">10</span>
+                    </div>
+                    <div class="attribute">
+                        <span class="attr-icon">⚡</span>
+                        <span class="attr-label">SPD</span>
+                        <span class="attr-value" id="speed">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-bottom">
+                <div class="energy-bar">
+                    <span class="energy-label">ENERGY</span>
+                    <div class="energy-bar-container">
+                        <div class="energy-bar-fill" id="energy-bar"></div>
+                    </div>
+                    <span class="energy-value" id="energy-text">100/100</span>
+                </div>
+                <div class="controls-info">
+                    <span>WASD - Move</span>
+                    <span>E - Interact</span>
+                    <span>SPACE - Sprint</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="interaction-prompt" class="hidden">
+            <span class="prompt-key">E</span>
+            <span class="prompt-text" id="prompt-text">Interact</span>
+        </div>
+
+        <div id="workout-overlay" class="hidden">
+            <div class="workout-panel">
+                <h2 id="workout-title">WORKOUT</h2>
+                <div class="workout-progress">
+                    <div class="progress-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="progress-bg" cx="50" cy="50" r="45"/>
+                            <circle class="progress-fill" id="workout-progress" cx="50" cy="50" r="45"/>
+                        </svg>
+                        <span class="progress-percent" id="workout-percent">0%</span>
+                    </div>
+                </div>
+                <div class="workout-instruction" id="workout-instruction">
+                    Press SPACE repeatedly!
+                </div>
+                <div class="workout-stats">
+                    <div class="workout-stat">
+                        <span class="stat-icon">💪</span>
+                        <span class="stat-label">Strength</span>
+                        <span class="stat-gain" id="str-gain">+0</span>
+                    </div>
+                    <div class="workout-stat">
+                        <span class="stat-icon">❤️</span>
+                        <span class="stat-label">Endurance</span>
+                        <span class="stat-gain" id="end-gain">+0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="level-up-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>LEVEL UP!</h2>
+                <div class="level-info">
+                    <span class="new-level">Level <span id="new-level">2</span></span>
+                    <span class="level-bonus">All stats increased!</span>
+                </div>
+                <button class="modal-btn" id="continue-btn">CONTINUE</button>
+            </div>
+        </div>
+
+        <div id="start-screen">
+            <div class="start-content">
+                <h1 class="game-title">GYM HERO 3D</h1>
+                <p class="game-subtitle">Train hard, get strong!</p>
+                <button class="start-btn" id="start-btn">START TRAINING</button>
+                <div class="start-controls">
+                    <span>WASD - Move</span>
+                    <span>E - Interact</span>
+                    <span>SPACE - Sprint / Workout</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

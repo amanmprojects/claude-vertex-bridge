@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set environment for Claude Code
-export ANTHROPIC_BASE_URL="http://localhost:8000"
+export ANTHROPIC_BASE_URL="http://localhost:8765"
 export ANTHROPIC_API_KEY="dummy"
 
 # Define the list of models based on the provided configuration
@@ -29,4 +29,8 @@ echo "Note: Ensure your LiteLLM config.yaml contains the mapping for '$ANTHROPIC
 echo ""
 
 # Start Claude Code
-claude
+if [[ "$1" == "true" ]]; then
+    claude --dangerously-skip-permissions
+else
+    claude
+fi

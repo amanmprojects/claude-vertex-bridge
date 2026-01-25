@@ -1,198 +1,238 @@
 # Claude Vertex Bridge
 
-Use Google Cloud Vertex AI Model Garden models with AI coding tools like [Claude Code](https://claude.ai/claude-code) and [OpenCode](https://opencode.ai).
-
-This project sets up a LiteLLM proxy that bridges Vertex AI endpoints to OpenAI-compatible API, allowing you to use open-source models with tools that only support standard APIs.
+A Docker-based proxy that bridges Claude Code/VS Code/Claude Desktop to Google Vertex AI Model Garden, enabling use of open-source AI models (GLM-4.7, Qwen, MiniMax, DeepSeek, Kimi) with Claude's native interface.
 
 ## Features
 
-- **Multi-model support**: MiniMax M2, DeepSeek V3, Kimi K2, Qwen Coder, GLM-4.7
-- **Shared LiteLLM manager**: Run Claude Code and OpenCode simultaneously without conflicts
-- **CLI wrappers**: `modclaude` and `modoc` to launch tools from anywhere
-- **Automatic token refresh**: Vertex tokens refresh automatically (every 50 minutes)
+- **Seamless Integration**: Use Claude Code, VS Code Anthropic extension, or Claude Desktop with Vertex AI models
+- **Auto-Start**: Docker container automatically starts on boot and stays running
+- **Token Refresh**: Automatic Vertex token refresh every 50 minutes
+- **Multiple Models**: GLM-4.7, Qwen Coder, MiniMax M2, DeepSeek V3, Kimi K2
+- **Cost Tracking**: Logs token usage and estimated costs for each request
+- **Simple Wrappers**: `modclaude` and `modoc` scripts for easy CLI usage
 
-## Setup
+## Quick Start
 
 ### Prerequisites
 
-- Google Cloud project with Vertex AI enabled
-- Service account key with Vertex AI permissions
-- Python 3.12+
-- Python virtual environment
+- Docker and docker-compose installed
+- Google Cloud project with Vertex AI Model Garden enabled
+- Google Cloud service account key (JSON format)
 
-### Installation
+### Setup
 
-1. Clone this repository:
-```bash
-git clone <your-repo-url>
-cd claude-vertex-bridge
-```
+1. **Clone the repository:**
+   ```bash
+   git clone <repo-url>
+   cd claude-code-debug-vertex
+   ```
 
-2. Create a Python virtual environment:
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+2. **Place your Vertex AI service account key:**
+   ```bash
+   cp /path/to/your/service-account-key.json vertex/key.json
+   ```
 
-3. Install dependencies:
-```bash
-pip install litellm google-cloud-aiplatform
-```
+3. **Build and start the Docker container:**
+   ```bash
+   docker compose up -d --build
+   # Or run the setup script:
+   ./scripts/docker_setup.sh
+   ```
 
-4. Configure your credentials:
-
-Create a `.env` file from the example:
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your values:
-```bash
-GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/key.json"
-VERTEX_PROJECT_ID="your-project-id"
-```
-
-5. Create the LiteLLM config:
-```bash
-cp config/litellm_config.yaml.example config/litellm_config.yaml
-```
-
-Edit `config/litellm_config.yaml` and replace `YOUR-PROJECT` with your Google Cloud project ID.
-
-6. Make scripts executable:
-```bash
-chmod +x modclaude modoc manage_litellm.sh
-```
+4. **Verify the proxy is running:**
+   ```bash
+   curl http://localhost:8765/health
+   curl http://localhost:8765/v1/models
+   ```
 
 ## Usage
 
-### Using modclaude (Claude Code)
+There are two ways to use the proxy with Claude tools:
 
-Run Claude Code from any directory:
+### Option 1: Set Environment Variables (Recommended)
 
-```bash
-# Current directory
-./modclaude
-
-# Or from a specific directory
-./modclaude /path/to/your/project
-```
-
-### Using modoc (OpenCode)
-
-Run OpenCode from any directory:
+Add to your `~/.profile` or `~/.bashrc`:
 
 ```bash
-# Current directory - will prompt for model selection
-./modoc
-
-# Or from a specific directory
-./modoc /path/to/your/project
+export ANTHROPIC_BASE_URL="http://localhost:8765"
+export ANTHROPIC_API_KEY="dummy"  # LiteLLM doesn't validate this
 ```
 
-You can choose from these models:
-- minimax (MiniMax M2)
-- deepseek (DeepSeek V3)
-- kimi (Kimi K2)
-- qwen (Qwen Coder)
-- glm-4.7 (GLM-4.7)
-
-### Running Both Simultaneously
-
-The shared LiteLLM manager handles multiple clients safely:
+Then reload your shell and use Claude tools directly:
 
 ```bash
-# Terminal 1
-./modclaude
+# Claude Code (if installed globally)
+claude
 
-# Terminal 2 (in different directory if needed)
-./modoc
+# OpenCode (if installed globally)
+opencode -m glm-4.7
 ```
 
-Both will share the same LiteLLM proxy on port 8000. Closing one won't affect the other.
+This is the simplest approach if you use Vertex models most of the time.
 
-### Managing LiteLLM
+### Option 2: Use Wrapper Scripts
 
-Check LiteLLM status:
+The wrapper scripts are convenience for switching between Vertex and default APIs without changing your environment variables.
+
 ```bash
-./manage_litellm.sh status
+# Run Claude Code with Vertex models
+./modclaude [directory]
+
+# Run Claude Code with --dsp flag
+./modclaude --dsp [directory]
+
+# Run OpenCode with model selection
+./modoc [directory]
 ```
 
-Force stop LiteLLM:
-```bash
-./manage_litellm.sh stop
+### Using VS Code Extension
+
+Install the Anthropic VS Code extension and configure:
+
+```json
+{
+  "anthropic.baseUrl": "http://localhost:8765",
+  "anthropic.useBrowserLogin": false
+}
 ```
+
+### Using Claude Desktop
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "baseUrl": "http://localhost:8765"
+}
+```
+
+## Docker Management
+
+```bash
+# View logs
+docker logs -f modclaude-litellm
+
+# Check status
+docker ps | grep modclaude-litellm
+
+# Stop the container
+docker compose down
+
+# Restart the container
+docker compose restart
+
+# Rebuild after changes
+docker compose up -d --build
+
+# Check restart policy (auto-start on boot)
+docker inspect modclaude-litellm | grep -A 5 RestartPolicy
+```
+
+## Available Models
+
+| Claude Name (VS Code) | Direct Name | Actual Model |
+|----------------------|-------------|--------------|
+| claude-opus-4-5-20251101 | glm-4.7 | GLM-4.7 (ZhiPu AI) |
+| claude-sonnet-4-5-20250929 | qwen | Qwen3 Coder (Alibaba) |
+| claude-haiku-4-5-20251001 | minimax | MiniMax M2 |
+| - | deepseek | DeepSeek V3.2 |
+| - | kimi | Kimi K2 (Moonshot AI) |
+
+## Configuration
+
+### Proxy Port
+
+Default port is **8765**. To change:
+- Edit `docker-compose.yml` and change `"8765:8765"` to `"YOUR_PORT:8765"`
+- Restart the container
+
+### Token Refresh Interval
+
+Token is refreshed every 50 minutes (3000 seconds) inside the container. To change:
+- Edit `docker/entrypoint.sh` and modify `sleep 3000`
+- Rebuild the container
+
+### Logging
+
+Token usage and cost logs are written to:
+- `_token_usage.log` in the working directory where Claude Code/OpenCode runs
 
 ## Project Structure
 
 ```
-claude-vertex-bridge/
-├── modclaude                  # Claude Code wrapper
-├── modoc                      # OpenCode wrapper
-├── manage_litellm.sh          # Shared LiteLLM manager
-├── start_claude.sh            # Claude Code launcher
-├── run_litellm_all.sh         # Legacy LiteLLM starter
+claude-code-debug-vertex/
+├── docker/
+│   ├── Dockerfile          # Container image definition
+│   └── entrypoint.sh       # Container startup script with token refresh
 ├── config/
-│   └── litellm_config.yaml.example  # LiteLLM config template
+│   ├── litellm_config.yaml # LiteLLM model configuration
+│   └── token_logger.py     # Token usage and cost logger
+├── scripts/
+│   └── docker_setup.sh     # Automated setup script
 ├── vertex/
-│   ├── get_vertex_token.py    # Vertex AI token generator
-│   └── claude_vertex_proxy.py # Claude wrapper for Vertex
-├── .env.example               # Environment variables template
-├── .gitignore                 # Git ignore rules
-└── README.md                  # This file
+│   ├── key.json           # Your Google Cloud service account key (not in git)
+│   └── get_vertex_token.py # Token generation script
+├── modclaude              # Claude Code wrapper script
+├── modoc                  # OpenCode wrapper script
+├── start_claude.sh        # Claude Code startup script
+├── docker-compose.yml     # Docker Compose configuration
+└── requirements.txt       # Python dependencies
 ```
-
-## Configuration Files
-
-The following files are **NOT** tracked by git (see `.gitignore`):
-- `.env` - Contains your credentials
-- `config/litellm_config.yaml` - Contains your project ID
-- `vertex/key.json` - Your service account key
-- All `*.yaml` config files with credentials
 
 ## Troubleshooting
 
-### LiteLLM won't start
+### Container won't start
 
-Check the manager log:
+Check logs: `docker logs modclaude-litellm`
+
+Common issues:
+- Missing `vertex/key.json` - Ensure your service account key is in place
+- Invalid service account - Verify the key has Vertex AI permissions
+- Port conflict - Change port in `docker-compose.yml`
+
+### Token refresh not working
+
+The token refresh runs in the background inside the container. Check logs:
 ```bash
-cat .litellm_manager.log
+docker logs modclaude-litellm | grep "Token refreshed"
 ```
 
-Force stop and restart:
-```bash
-./manage_litellm.sh stop
-./manage_litellm.sh connect
-```
+### Claude Code not connecting
 
-### Vertex token expired
+- Verify proxy is running: `curl http://localhost:8765/health`
+- Check `start_claude.sh` has correct `ANTHROPIC_BASE_URL` (should be `http://localhost:8765`)
 
-The token refreshes automatically every 50 minutes. If issues persist, check that your service account key is valid and has the right permissions.
+## Feature Compatibility
 
-### Port 8000 already in use
+LiteLLM translates Anthropic API calls to OpenAI-compatible format. Here's what works:
 
-If another process is using port 8000:
-```bash
-lsof -i :8000
-kill <PID>
-```
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Basic chat completion | Full | Text generation, streaming |
+| System prompts | Full | Vertex models respect system prompts |
+| Tool calling | Full | LiteLLM translates tool format |
+| Temperature, top_p, max_tokens | Full | Standard parameters work |
+| Images/Vision | Mostly | Depends on model support |
+| Prompt caching | No | Anthropic cache control headers not preserved |
+| Citation sources | No | Anthropic-specific citation format not preserved |
+| Extended reasoning/beta features | No | Anthropic-specific features may not work |
 
-Then start fresh:
-```bash
-./manage_litellm.sh stop
-```
+For coding tasks (file edits, terminal commands, tool use), all core functionality works as expected.
 
-## Security
+Token usage is logged with estimated costs:
 
-- Never commit `.env`, `config/litellm_config.yaml`, or `vertex/key.json`
-- Use environment variables for sensitive data
-- Rotate your service account keys regularly
-- Restrict service account permissions to only what's needed
+| Model | Input ($/1M tokens) | Output ($/1M tokens) |
+|-------|---------------------|----------------------|
+| GLM-4.7 | $0.60 | $2.20 |
+
+View logs from any directory where you ran Claude: `cat _token_usage.log`
 
 ## License
 
 MIT
 
-## Contributing
+## Security Notes
 
-Feel free to open issues or pull requests!
+- Service account key contains sensitive credentials - never commit it to git
+- The `.gitignore` file excludes `vertex/key.json`
+- Keep the key file secure with proper file permissions

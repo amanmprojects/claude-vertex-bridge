@@ -19,23 +19,22 @@ vertex/key.json
 *.key
 .env
 
-# State files for LiteLLM manager
+# LiteLLM manager state files (legacy)
 .litellm_ref_count
 .litellm_pid
 .litellm_refresh_pid
 .litellm_manager.log
 
-# Actual config files with credentials
-litellm_config*.yaml
-vertex/litellm_config.yaml
-basten/litellm_config*.yaml
+# Token usage logs
+_token_usage.log
+*.token_usage.log
 
 # Claude data
 .claude/
 
-# Examples folder
-examples/
-
 # OS files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
