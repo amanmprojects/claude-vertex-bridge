@@ -2,25 +2,25 @@ model_list:
   - model_name: minimax
     litellm_params:
       model: openai/minimaxai/minimax-m2-maas
-      api_base: https://aiplatform.googleapis.com/v1beta1/projects/YOUR_PROJECT_ID/locations/global/endpoints/openapi
+      api_base: https://aiplatform.googleapis.com/v1beta1/projects/chatapp-by-amanm/locations/global/endpoints/openapi
       api_key: os.environ/VERTEX_TOKEN
       
   - model_name: deepseek
     litellm_params:
       model: openai/deepseek-ai/deepseek-v3.2-maas
-      api_base: https://aiplatform.googleapis.com/v1beta1/projects/YOUR_PROJECT_ID/locations/global/endpoints/openapi
+      api_base: https://aiplatform.googleapis.com/v1beta1/projects/chatapp-by-amanm/locations/global/endpoints/openapi
       api_key: os.environ/VERTEX_TOKEN
       
   - model_name: kimi
     litellm_params:
       model: openai/moonshotai/kimi-k2-thinking-maas
-      api_base: https://aiplatform.googleapis.com/v1beta1/projects/YOUR_PROJECT_ID/locations/global/endpoints/openapi
+      api_base: https://aiplatform.googleapis.com/v1beta1/projects/chatapp-by-amanm/locations/global/endpoints/openapi
       api_key: os.environ/VERTEX_TOKEN
 
   - model_name: qwen
     litellm_params:
       model: openai/qwen/qwen3-coder-480b-a35b-instruct-maas
-      api_base: https://aiplatform.googleapis.com/v1beta1/projects/YOUR_PROJECT_ID/locations/global/endpoints/openapi
+      api_base: https://aiplatform.googleapis.com/v1beta1/projects/chatapp-by-amanm/locations/global/endpoints/openapi
       api_key: os.environ/VERTEX_TOKEN
 
 litellm_settings:
